@@ -12,12 +12,14 @@ class TabsModule(reactContext: ReactApplicationContext, val context: Context) : 
 
     @ReactMethod
     fun list(promise: Promise) {
+        val current = context.components.core.sessionManager.selectedSession
         val results = context.components.core.sessionManager.sessions.map {
             val map = Bundle()
             map.putString("id", it.id)
             map.putString("title", it.title)
             map.putString("url", it.url)
             map.putString("searchTerms", it.searchTerms)
+            map.putBoolean("selected", current != null && it.id == current.id)
             map
         }
         promise.resolve(Arguments.fromList(results))

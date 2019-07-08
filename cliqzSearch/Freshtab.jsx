@@ -13,7 +13,7 @@ import { Logo } from '@cliqz/component-ui-logo';
 
 const {
   BrowserActions,
-  URLBar,
+  Tabs,
 } = NativeModules;
 
 var styles = StyleSheet.create({
@@ -56,6 +56,7 @@ const LogoWithText = ({ domain }) => {
     <TouchableOpacity
       onPress={() => BrowserActions.openLink(url, '')}
       style={styles.row}
+      key={domain}
     >
       <Logo
         logo={{
@@ -73,7 +74,7 @@ const LogoWithText = ({ domain }) => {
 
 const IS_SHOWN_EVENT = 'NEW_TAB:SHOW';
 
-export default class Freshtab extends React.Component {
+class TopSites extends React.Component {
   state = {
     topDomains: [],
   }
@@ -107,5 +108,94 @@ export default class Freshtab extends React.Component {
         <View style={styles.spacer} />
       </View>
     );
+  }
+}
+
+class TabView extends React.Component {
+
+  state = {
+    tabs: [],
+  };
+
+  async componentDidMount() {
+    const tabs = await Tabs.list();
+    console.log('xxx', tabs);
+    this.setState({ tabs });
+  }
+
+  renderTab({ item }) {
+    console.log('xxx', item);
+    const { id, title, url, selected } = item;
+
+    const logo = getLogo(url) || {
+      color: '9077e3',
+      text: url,
+      url,
+    };
+    return (
+      <TouchableOpacity
+        onPress={() => {}}
+        style={styles.row}
+        key={id}
+      >
+        <Logo
+          logo={{
+            ...logo,
+            url,
+          }}
+        />
+        <View style={styles.rowText}>
+          <Text style={{ color: 'white' }}>{title}</Text>
+          <Text style={{ color: 'white' }}>{url}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
+  render() {
+    console.log('xxx render', this.state.tabs);
+    return (
+      <View style={styles.container}>
+        <FlatList
+          data={this.state.tabs}
+          renderItem={this.renderTab.bind(this)}
+          style={styles.list}
+        />
+      </View>
+    );
+  }
+}
+
+const FRESHTAB_STATE_EVENT = 'FRESHTAB:SHOW_';
+
+export default class FreshTab extends React.Component {
+  state = {
+    view: 'tabs',
+  }
+
+  onFreshtabEvent(view) {
+    this.setState({
+      view
+    });
+  }
+
+  componentDidMount() {
+    this.showTabs = this.onFreshtabEvent.bind(this, 'tabs');
+    this.showTopSites = this.onFreshtabEvent.bind(this, 'topsites');
+    DeviceEventEmitter.addListener(`${FRESHTAB_STATE_EVENT}TABS`, this.showTabs);
+    DeviceEventEmitter.addListener(`${FRESHTAB_STATE_EVENT}HOME`, this.showTopSites);
+  }
+
+  componentWillUnmount() {
+    DeviceEventEmitter.removeListener(`${FRESHTAB_STATE_EVENT}TABS`, this.showTabs);
+    DeviceEventEmitter.removeListener(`${FRESHTAB_STATE_EVENT}HOME`, this.showTopSites);
+  }
+
+  render() {
+    if (this.state.view === 'topsites') {
+      return <TopSites/>
+    } else {
+      return <TabView />
+    }
   }
 }

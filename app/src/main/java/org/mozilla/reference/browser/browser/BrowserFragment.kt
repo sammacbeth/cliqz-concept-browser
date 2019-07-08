@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.cliqz.components.search.CliqzFeature
+import com.cliqz.components.search.FreshtabFragment
 import kotlinx.android.synthetic.main.fragment_browser.*
 import kotlinx.android.synthetic.main.fragment_browser.view.*
 import mozilla.components.feature.awesomebar.AwesomeBarFeature
@@ -249,7 +250,7 @@ class BrowserFragment : Fragment(), BackHandler, UserInteractionHandler {
         // For now we are performing manual fragment transactions here. Once we can use the new
         // navigation support library we may want to pass navigation graphs around.
         activity?.supportFragmentManager?.beginTransaction()?.apply {
-            replace(R.id.container, TabsTrayFragment())
+            replace(R.id.container, FreshtabFragment())
             commit()
         }
     }
